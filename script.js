@@ -60,7 +60,7 @@ let customers   = JSON.parse(localStorage.getItem('crm_customers') || '[]');
   /* ═══════════════════════════════════════════════════════
      Google Drive upload — uses the existing buildPage() HTML
   ═══════════════════════════════════════════════════════ */
-  const GOOGLE_SCRIPT_URL = '%%GOOGLE_SCRIPT_URL%%';
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxNJC4vkPkEQOcmbQfVihhURdqbu_zMvIl1LrXaaSrSe66A3AGPGW4NVNnSqPQexiI/exec';
  
   async function capturePageToPdfBase64(customer) {
     const { jsPDF } = window.jspdf;
