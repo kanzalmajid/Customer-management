@@ -58,70 +58,65 @@ let customers   = JSON.parse(localStorage.getItem('crm_customers') || '[]');
   function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
  
   /* ═══════════════════════════════════════════════════════
-     Google Drive upload
+     Google Drive upload — uses the existing buildPage() HTML
   ═══════════════════════════════════════════════════════ */
   const GOOGLE_SCRIPT_URL = '%%GOOGLE_SCRIPT_URL%%';
  
   async function capturePageToPdfBase64(customer) {
     const { jsPDF } = window.jspdf;
  
-    // Build the full print-ready HTML using the existing buildPage() function,
-    // wrapped with the page's own <style> block so all CSS is available.
-    const styles = [...document.styleSheets]
-      .map(ss => { try { return [...ss.cssRules].map(r=>r.cssText).join('\n'); } catch(e){ return ''; } })
-      .join('\n');
- 
-    const html = `<!DOCTYPE html><html lang="ar" dir="rtl">
-      <head><meta charset="UTF-8">
-      <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    // Render buildPage() HTML directly inside this document so fonts/styles are already loaded
+    const container = document.createElement('div');
+    container.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;background:#fff;font-family:Tajawal,sans-serif;direction:rtl;z-index:-1;pointer-events:none';
+    container.innerHTML = `
       <style>
-        body { margin:0; background:#fff; font-family:'Tajawal',sans-serif; direction:rtl; }
-        ${styles}
-        /* force print styles to apply without @media print */
-        #print-target { display:block !important; }
-        header,.tabs,#panel-add,#panel-list,.modal-overlay,.toast { display:none !important; }
-        .pdf-page {
-          page-break-after:always; break-after:page;
-          padding:44px 48px; background:#fff;
-          font-family:'Tajawal',sans-serif; direction:rtl;
-        }
+        .pdf-render-wrap .pdf-page        { padding:44px 48px;background:#fff;font-family:'Tajawal',sans-serif;direction:rtl; }
+        .pdf-render-wrap .pdf-topbar      { display:flex;align-items:center;justify-content:space-between;padding-bottom:18px;margin-bottom:28px;border-bottom:3px solid #C9A84C; }
+        .pdf-render-wrap .pdf-co-name     { font-size:24px;font-weight:900;color:#111; }
+        .pdf-render-wrap .pdf-co-sub      { font-size:12px;color:#999;margin-top:3px; }
+        .pdf-render-wrap .pdf-tag         { background:#C9A84C;color:#fff;padding:7px 18px;border-radius:6px;font-size:13px;font-weight:800; }
+        .pdf-render-wrap .pdf-hero        { display:flex;align-items:center;gap:22px;margin-bottom:30px; }
+        .pdf-render-wrap .pdf-av          { width:70px;height:70px;border-radius:14px;background:#fdf5e0;border:2px solid #C9A84C;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;color:#C9A84C;flex-shrink:0; }
+        .pdf-render-wrap .pdf-cname       { font-size:26px;font-weight:900;color:#111; }
+        .pdf-render-wrap .pdf-cproj       { font-size:15px;color:#C9A84C;font-weight:700;margin-top:4px; }
+        .pdf-render-wrap .pdf-grid        { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px; }
+        .pdf-render-wrap .pdf-cell        { background:#fafaf8;border:1px solid #e8e0cc;border-radius:10px;padding:14px 18px; }
+        .pdf-render-wrap .pdf-cell.span2  { grid-column:1/-1; }
+        .pdf-render-wrap .pdf-cell-lbl    { font-size:10px;font-weight:800;color:#aaa;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:7px; }
+        .pdf-render-wrap .pdf-cell-val    { font-size:15px;font-weight:700;color:#111; }
+        .pdf-render-wrap .pdf-branch-list { display:flex;flex-direction:column;gap:8px;margin-top:6px; }
+        .pdf-render-wrap .pdf-branch-row  { display:flex;align-items:center;gap:10px;font-size:14px;color:#333; }
+        .pdf-render-wrap .pdf-bnum        { background:#C9A84C;color:#fff;width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0; }
+        .pdf-render-wrap .pdf-pill        { display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:13px;font-weight:700; }
+        .pdf-render-wrap .pdf-pill.facebook  { background:#e8f0fd;color:#1877F2;border:1px solid #bad2fb; }
+        .pdf-render-wrap .pdf-pill.instagram { background:#fde8ef;color:#E1306C;border:1px solid #fbb7ce; }
+        .pdf-render-wrap .pdf-pill.tiktok    { background:#f0f0f0;color:#333;border:1px solid #ccc; }
+        .pdf-render-wrap .pdf-pill.promoter  { background:#fdf4e0;color:#8a6000;border:1px solid #e8c97a; }
+        .pdf-render-wrap .pdf-notes { background:#fdf9f0;border:1px solid #e8d9a8;border-radius:8px;padding:12px 16px;font-size:13px;color:#555;line-height:1.8;margin-top:6px; }
+        .pdf-render-wrap .pdf-foot  { margin-top:36px;padding-top:14px;border-top:1px solid #e0d5b0;display:flex;justify-content:space-between;font-size:11px;color:#bbb; }
       </style>
-      </head><body>
-      <div id="print-target">${buildPage(customer)}</div>
-      </body></html>`;
+      <div class="pdf-render-wrap">${buildPage(customer)}</div>`;
  
-    // Render in a hidden off-screen iframe
-    const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;height:1123px;border:none;visibility:hidden;';
-    document.body.appendChild(iframe);
+    document.body.appendChild(container);
+    await new Promise(r => setTimeout(r, 200));
  
-    await new Promise(resolve => {
-      iframe.onload = resolve;
-      iframe.srcdoc = html;
-    });
- 
-    // Wait for fonts inside the iframe
-    await iframe.contentDocument.fonts.ready;
-    await new Promise(r => setTimeout(r, 400));
- 
-    const canvas = await html2canvas(iframe.contentDocument.body, {
+    const target = container.querySelector('.pdf-render-wrap');
+    const canvas = await html2canvas(target, {
       scale: 2,
       useCORS: true,
-      allowTaint: true,
       backgroundColor: '#ffffff',
       width: 794,
-      height: 1123,
-      windowWidth: 794,
-      windowHeight: 1123
+      windowWidth: 794
     });
  
-    document.body.removeChild(iframe);
+    document.body.removeChild(container);
  
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const doc     = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const imgData = canvas.toDataURL('image/jpeg', 0.95);
-    doc.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+    const pdfH    = (canvas.height / canvas.width) * 210;
+    doc.addImage(imgData, 'JPEG', 0, 0, 210, pdfH);
  
-    return doc.output('datauristring').split(',')[1]; // base64 only
+    return doc.output('datauristring').split(',')[1];
   }
  
   async function uploadToDrive(pdfBase64, fileName) {
@@ -131,6 +126,8 @@ let customers   = JSON.parse(localStorage.getItem('crm_customers') || '[]');
     }
     try {
       // Google Apps Script doesn't send CORS headers, so we use no-cors mode.
+      // The request still goes through and the script saves the file —
+      // we just can't read the response back (opaque response), which is fine.
       await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
