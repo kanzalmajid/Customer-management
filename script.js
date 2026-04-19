@@ -120,6 +120,7 @@ let customers   = JSON.parse(localStorage.getItem('crm_customers') || '[]');
   }
  
   async function uploadToDrive(pdfBase64, fileName) {
+    console.log("This is the secret" + GOOGLE_SCRIPT_URL);
     if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === '%%GOOGLE_SCRIPT_URL%%') {
       console.warn('GOOGLE_SCRIPT_URL not set — skipping Drive upload.');
       return false;
