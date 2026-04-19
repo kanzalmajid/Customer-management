@@ -102,7 +102,7 @@ let customers   = JSON.parse(localStorage.getItem('crm_customers') || '[]');
  
     const target = container.querySelector('.pdf-render-wrap');
     const canvas = await html2canvas(target, {
-      scale: 2,
+      scale: 3,
       useCORS: true,
       backgroundColor: '#ffffff',
       width: 794,
@@ -171,7 +171,7 @@ let customers   = JSON.parse(localStorage.getItem('crm_customers') || '[]');
  
     try {
       const pdfBase64 = await capturePageToPdfBase64(customer);
-      const fileName  = `customer_${customer.name.replace(/\s+/g,'_')}_${customer.id.slice(-6)}.pdf`;
+      const fileName = `استمارة_${customer.name}.pdf`;
       const uploaded  = await uploadToDrive(pdfBase64, fileName);
       showToast(uploaded ? '✅ تم الحفظ ورفع PDF إلى Google Drive بنجاح' : '✅ تم حفظ العميل (PDF لم يُرفع — تحقق من إعدادات Drive)');
     } catch (err) {
