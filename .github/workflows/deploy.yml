@@ -26,8 +26,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Inject Google Script URL
-        run: |
-          sed -i "s|%%GOOGLE_SCRIPT_URL%%|${{ secrets.GOOGLE_SCRIPT_URL }}|g" index.html
+        run: sed -i "s|%%GOOGLE_SCRIPT_URL%%|${{ secrets.GOOGLE_SCRIPT_URL }}|g" index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
