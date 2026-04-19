@@ -64,13 +64,12 @@ let customers   = JSON.parse(localStorage.getItem('crm_customers') || '[]');
  
   async function capturePageToPdfBase64(customer) {
     const { jsPDF } = window.jspdf;
-
+ 
+    // Render buildPage() HTML directly inside this document so fonts/styles are already loaded
     const container = document.createElement('div');
     container.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;background:#fff;font-family:Tajawal,sans-serif;direction:rtl;z-index:-1;pointer-events:none';
     container.innerHTML = `
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap');
-        .pdf-render-wrap { font-family:'Tajawal',sans-serif; direction:rtl; background:#fff; }
         .pdf-render-wrap .pdf-page        { padding:44px 48px;background:#fff;font-family:'Tajawal',sans-serif;direction:rtl; }
         .pdf-render-wrap .pdf-topbar      { display:flex;align-items:center;justify-content:space-between;padding-bottom:18px;margin-bottom:28px;border-bottom:3px solid #C9A84C; }
         .pdf-render-wrap .pdf-co-name     { font-size:24px;font-weight:900;color:#111; }
@@ -97,23 +96,26 @@ let customers   = JSON.parse(localStorage.getItem('crm_customers') || '[]');
         .pdf-render-wrap .pdf-foot  { margin-top:36px;padding-top:14px;border-top:1px solid #e0d5b0;display:flex;justify-content:space-between;font-size:11px;color:#bbb; }
       </style>
       <div class="pdf-render-wrap">${buildPage(customer)}</div>`;
-
+ 
     document.body.appendChild(container);
-    await document.fonts.ready;
-    await new Promise(r => setTimeout(r, 300));
-
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-    await doc.html(container.querySelector('.pdf-render-wrap'), {
-      callback: function(doc) {},
-      x: 0,
-      y: 0,
-      width: 210,
-      windowWidth: 794,
-      autoPaging: 'text'
+    await new Promise(r => setTimeout(r, 200));
+ 
+    const target = container.querySelector('.pdf-render-wrap');
+    const canvas = await html2canvas(target, {
+      scale: 5,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      width: 794,
+      windowWidth: 794
     });
-
+ 
     document.body.removeChild(container);
+ 
+    const doc     = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const pdfH    = (canvas.height / canvas.width) * 210;
+    doc.addImage(imgData, 'JPEG', 0, 0, 210, pdfH);
+ 
     return doc.output('datauristring').split(',')[1];
   }
  
