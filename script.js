@@ -27,7 +27,7 @@ let customers   = JSON.parse(localStorage.getItem('crm_customers') || '[]');
     const list = document.getElementById('branch-list');
     const row  = document.createElement('div');
     row.className = 'branch-row';
-    row.innerHTML = `<input type="text" placeholder="موقع الفرع (مثال: جدة - حي الروضة)">
+    row.innerHTML = `<input type="text" placeholder="موقع الفرع (مثال: البصرة - العشار)">
                      <button class="btn-icon" onclick="removeBranch(this)">✕</button>`;
     list.appendChild(row);
     row.querySelector('input').focus();
