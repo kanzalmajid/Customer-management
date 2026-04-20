@@ -82,7 +82,7 @@ let customers   = JSON.parse(localStorage.getItem('crm_customers') || '[]');
         .pdf-render-wrap .pdf-grid        { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px; }
         .pdf-render-wrap .pdf-cell        { background:#fafaf8;border:1px solid #e8e0cc;border-radius:10px;padding:14px 18px; }
         .pdf-render-wrap .pdf-cell.span2  { grid-column:1/-1; }
-        .pdf-render-wrap .pdf-cell-lbl    { font-size:10px;font-weight:800;color:#aaa;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:7px; }
+        .pdf-render-wrap .pdf-cell-lbl    { font-size:10px;font-weight:800;color:#aaa;text-transform:uppercase;margin-bottom:7px; }
         .pdf-render-wrap .pdf-cell-val    { font-size:15px;font-weight:700;color:#111; }
         .pdf-render-wrap .pdf-branch-list { display:flex;flex-direction:column;gap:8px;margin-top:6px; }
         .pdf-render-wrap .pdf-branch-row  { display:flex;align-items:center;gap:10px;font-size:14px;color:#333; }
