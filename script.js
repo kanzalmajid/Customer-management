@@ -153,7 +153,7 @@ let customers   = JSON.parse(localStorage.getItem('crm_customers') || '[]');
  
     if (!name)    { showToast('⚠️ الرجاء إدخال اسم العميل');    return; }
     if (!project) { showToast('⚠️ الرجاء إدخال اسم المشروع');   return; }
-    if (phone && (phone.length !== 11 || !/^07[78]/.test(phone))) {
+    if (phone && (phone.length !== 11 || !/^07[78]|[79]/.test(phone))) {
   showToast('⚠️ رقم الهاتف يجب أن يكون 11 رقماً ويبدأ بـ 077 أو 078'); return;
 }
     if (!src)     { showToast('⚠️ الرجاء اختيار مصدر المعرفة'); return; }
